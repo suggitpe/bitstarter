@@ -56,7 +56,7 @@ var loadChecks = function (checksfile) {
 };
 
 var checkHtmlFile = function (htmlfile, checksfile) {
-    fs.readFile(htmlfile, function (err, data) {
+    fs.readFile(htmlfile, 'utf-8', function (err, data) {
         if (err) throw err;
         $ = cheerio.load(data)
         var checks = loadChecks(checksfile).sort();
@@ -66,6 +66,20 @@ var checkHtmlFile = function (htmlfile, checksfile) {
             out[checks[ii]] = present;
         }
         outputJsonToConsole(out);
+    });
+};
+
+var checkHtmlUrl = function (htmlurl, checksfile) {
+    rest.get(htmlurl).once('success', function (data, response) {
+        $ = cheerio.load(data)
+        var checks = loadChecks(checksfile).sort();
+        var out = {};
+        for (var ii in checks) {
+            var present = $(checks[ii]).length > 0;
+            out[checks[ii]] = present;
+        }
+        outputJsonToConsole(out);
+
     });
 };
 
@@ -85,7 +99,7 @@ function gradeHtml() {
         checkHtmlFile(program.file, program.checks);
     }
     else {
-        throw "Not supported yet"
+        checkHtmlUrl(program.url, program.checks);
     }
 }
 
