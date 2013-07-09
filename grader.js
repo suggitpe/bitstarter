@@ -39,7 +39,6 @@ var assertFileExists = function (infile) {
 };
 
 var assertUrlExists = function (url) {
-    console.log("Checking url [" + url + "] exists")
     var urlAsString = url.toString();
     if (rest.head(urlAsString).length === 0) {
         console.log("Could not find url [" + urlAsString + "]")
@@ -57,14 +56,17 @@ var loadChecks = function (checksfile) {
 };
 
 var checkHtmlFile = function (htmlfile, checksfile) {
-    $ = cheerioHtmlFile(htmlfile);
-    var checks = loadChecks(checksfile).sort();
-    var out = {};
-    for (var ii in checks) {
-        var present = $(checks[ii]).length > 0;
-        out[checks[ii]] = present;
-    }
-    outputJsonToConsole(out);
+    fs.readFile(htmlfile, function (err, data) {
+        if (err) throw err;
+        $ = cheerio.load(data)
+        var checks = loadChecks(checksfile).sort();
+        var out = {};
+        for (var ii in checks) {
+            var present = $(checks[ii]).length > 0;
+            out[checks[ii]] = present;
+        }
+        outputJsonToConsole(out);
+    });
 };
 
 var clone = function (fn) {
@@ -82,7 +84,7 @@ function gradeHtml() {
     if (program.file) {
         checkHtmlFile(program.file, program.checks);
     }
-    else{
+    else {
         throw "Not supported yet"
     }
 }
