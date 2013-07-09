@@ -64,7 +64,7 @@ var checkHtmlFile = function (htmlfile, checksfile) {
         var present = $(checks[ii]).length > 0;
         out[checks[ii]] = present;
     }
-    return out;
+    outputJsonToConsole(out);
 };
 
 var clone = function (fn) {
@@ -73,10 +73,18 @@ var clone = function (fn) {
     return fn.bind({});
 };
 
-function gradeHtml() {
-    var checkJson = checkHtmlFile(program.file, program.checks);
+function outputJsonToConsole(checkJson) {
     var outJson = JSON.stringify(checkJson, null, 4);
     console.log(outJson);
+}
+
+function gradeHtml() {
+    if (program.file) {
+        checkHtmlFile(program.file, program.checks);
+    }
+    else{
+        throw "Not supported yet"
+    }
 }
 
 if (require.main == module) {
