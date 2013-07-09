@@ -47,39 +47,30 @@ var assertUrlExists = function (url) {
     return urlAsString;
 };
 
-var cheerioHtmlFile = function (htmlfile) {
-    return cheerio.load(fs.readFileSync(htmlfile));
-};
-
 var loadChecks = function (checksfile) {
     return JSON.parse(fs.readFileSync(checksfile));
 };
 
+function checkHtmlAndDisplayResults(data, checksfile) {
+    $ = cheerio.load(data)
+    var checks = loadChecks(checksfile).sort();
+    var out = {};
+    for (var ii in checks) {
+        var present = $(checks[ii]).length > 0;
+        out[checks[ii]] = present;
+    }
+    outputJsonToConsole(out);
+}
 var checkHtmlFile = function (htmlfile, checksfile) {
     fs.readFile(htmlfile, 'utf-8', function (err, data) {
         if (err) throw err;
-        $ = cheerio.load(data)
-        var checks = loadChecks(checksfile).sort();
-        var out = {};
-        for (var ii in checks) {
-            var present = $(checks[ii]).length > 0;
-            out[checks[ii]] = present;
-        }
-        outputJsonToConsole(out);
+        checkHtmlAndDisplayResults(data, checksfile);
     });
 };
 
 var checkHtmlUrl = function (htmlurl, checksfile) {
-    rest.get(htmlurl).once('success', function (data, response) {
-        $ = cheerio.load(data)
-        var checks = loadChecks(checksfile).sort();
-        var out = {};
-        for (var ii in checks) {
-            var present = $(checks[ii]).length > 0;
-            out[checks[ii]] = present;
-        }
-        outputJsonToConsole(out);
-
+    rest.get(htmlurl).once('complete', function (result, response) {
+        checkHtmlAndDisplayResults(result, checksfile);
     });
 };
 
