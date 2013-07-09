@@ -26,7 +26,7 @@ var fs = require('fs');
 var program = require('commander');
 var cheerio = require('cheerio');
 var rest = require("restler")
-var HTMLFILE_DEFAULT = "index.html";
+
 var CHECKSFILE_DEFAULT = "checks.json";
 
 var assertFileExists = function (infile) {
@@ -48,29 +48,30 @@ var assertUrlExists = function (url) {
 };
 
 var loadChecks = function (checksfile) {
-    return JSON.parse(fs.readFileSync(checksfile));
+    return JSON.parse(fs.readFileSync(checksfile)).sort();
 };
 
-function checkHtmlAndDisplayResults(data, checksfile) {
-    $ = cheerio.load(data)
-    var checks = loadChecks(checksfile).sort();
+function checkHtmlAndDisplayResults(data, checks) {
+    var foo = cheerio.load(data)
     var out = {};
     for (var ii in checks) {
-        var present = $(checks[ii]).length > 0;
+        var present = foo(checks[ii]).length > 0;
         out[checks[ii]] = present;
     }
-    outputJsonToConsole(out);
-}
-var checkHtmlFile = function (htmlfile, checksfile) {
+    var outJson = JSON.stringify(out, null, 4);
+    console.log(outJson);
+};
+
+var checkHtmlFile = function (htmlfile, checks) {
     fs.readFile(htmlfile, 'utf-8', function (err, data) {
         if (err) throw err;
-        checkHtmlAndDisplayResults(data, checksfile);
+        checkHtmlAndDisplayResults(data, checks);
     });
 };
 
-var checkHtmlUrl = function (htmlurl, checksfile) {
+var checkHtmlUrl = function (htmlurl, checks) {
     rest.get(htmlurl).once('complete', function (result, response) {
-        checkHtmlAndDisplayResults(result, checksfile);
+        checkHtmlAndDisplayResults(result, checks);
     });
 };
 
@@ -80,17 +81,12 @@ var clone = function (fn) {
     return fn.bind({});
 };
 
-function outputJsonToConsole(checkJson) {
-    var outJson = JSON.stringify(checkJson, null, 4);
-    console.log(outJson);
-}
-
-function gradeHtml() {
+function gradeHtml(checks) {
     if (program.file) {
-        checkHtmlFile(program.file, program.checks);
+        checkHtmlFile(program.file, checks);
     }
     else {
-        checkHtmlUrl(program.url, program.checks);
+        checkHtmlUrl(program.url, checks);
     }
 }
 
@@ -100,7 +96,7 @@ if (require.main == module) {
         .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists))
         .option('-u, --url <html_url>', 'URL to index.html', clone(assertUrlExists))
         .parse(process.argv);
-    gradeHtml();
+    gradeHtml(loadChecks(program.checks));
 } else {
     exports.checkHtmlFile = checkHtmlFile;
 }
