@@ -14,7 +14,7 @@ This is a Javascript repo for a coursera startup engineering course.  This is a 
  - move to the staging branch `git checkout staging`
  - pull the changes from develop `git merge develop`
  - push the changes to github `git push origin staging`
- - push the change to heroku `git push production-heroku staging:master`
+ - push the change to heroku `git push staging-heroku staging:master`
  - now check github and check that the staging branch is ahead of master by n commits
  - also check heroku staging to verify that the changes are now there
  
@@ -22,6 +22,6 @@ This is a Javascript repo for a coursera startup engineering course.  This is a 
  - move to the staging branch `git checkout master`
  - pull the changes from develop `git merge staging`
  - push the changes to github `git push origin master`
- - push the change to heroku `git push staging-heroku master:master`
+ - push the change to heroku `git push production-heroku master:master`
  - now check github and check that all the branches are in sync with master
  - also check heroku staging to verify that the changes are now there
